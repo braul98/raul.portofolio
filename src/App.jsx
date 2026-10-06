@@ -428,10 +428,7 @@ export default function App() {
           project={detailProject}
           allProjects={projects}
           onClose={() => setDetailProject(null)}
-          onEdit={() => {
-            setDetailProject(null);
-            navigateTo('admin');
-          }}
+          onEdit={null}
           accentColor={accent}
         />
       )}
