@@ -98,9 +98,19 @@ export const INITIAL_PROJECTS = [
   }
 ];
 
+export const DEFAULT_SKILLS = [
+  { id: "sk-1", name: "Art Direction & Curation", percentage: 95, category: "Creative" },
+  { id: "sk-2", name: "Medium Format Photography", percentage: 92, category: "Visual" },
+  { id: "sk-3", name: "Editorial & Book Design", percentage: 88, category: "Design" },
+  { id: "sk-4", name: "Swiss Typography & Glyphs", percentage: 90, category: "Design" },
+  { id: "sk-5", name: "Brand Identity Systems", percentage: 85, category: "Branding" },
+  { id: "sk-6", name: "Spatial & Exhibition Design", percentage: 80, category: "Spatial" }
+];
+
 const STORAGE_KEYS = {
   PROJECTS: "vibe_portfolio_projects_v1",
-  PROFILE: "vibe_portfolio_profile_v1"
+  PROFILE: "vibe_portfolio_profile_v1",
+  SKILLS: "vibe_portfolio_skills_v1"
 };
 
 // Safe IndexedDB load / save helpers with fallback
@@ -149,6 +159,30 @@ export async function saveStoredProfile(profile) {
     return true;
   } catch (err) {
     console.error("IndexedDB profile save error:", err);
+    return false;
+  }
+}
+
+export async function getStoredSkills() {
+  try {
+    const data = await get(STORAGE_KEYS.SKILLS);
+    if (data && Array.isArray(data) && data.length > 0) {
+      return data;
+    }
+    await set(STORAGE_KEYS.SKILLS, DEFAULT_SKILLS);
+    return DEFAULT_SKILLS;
+  } catch (err) {
+    console.warn("IndexedDB skills load error:", err);
+    return DEFAULT_SKILLS;
+  }
+}
+
+export async function saveStoredSkills(skills) {
+  try {
+    await set(STORAGE_KEYS.SKILLS, skills);
+    return true;
+  } catch (err) {
+    console.error("IndexedDB skills save error:", err);
     return false;
   }
 }

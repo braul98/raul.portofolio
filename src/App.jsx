@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import FilterBar from './components/FilterBar';
+import PublicProjectCard from './components/PublicProjectCard';
 import ProjectCard from './components/ProjectCard';
+import SkillsSection from './components/SkillsSection';
+import AdminDashboard from './components/AdminDashboard';
 import ProjectDetailModal from './components/ProjectDetailModal';
 import ProjectEditModal from './components/ProjectEditModal';
 import ProfileModal from './components/ProfileModal';
@@ -11,10 +14,13 @@ import PrintDocument from './components/PrintDocument';
 import {
   DEFAULT_PROFILE,
   INITIAL_PROJECTS,
+  DEFAULT_SKILLS,
   getStoredProfile,
   getStoredProjects,
+  getStoredSkills,
   saveStoredProfile,
-  saveStoredProjects
+  saveStoredProjects,
+  saveStoredSkills
 } from './storage';
 import {
   fetchProjectsFromCloud,
@@ -22,49 +28,79 @@ import {
   saveProjectToCloud,
   deleteProjectFromCloud,
   fetchProfileFromCloud,
-  saveProfileToCloud
+  saveProfileToCloud,
+  fetchSkillsFromCloud,
+  syncSkillsToCloud
 } from './firebase';
 
 export default function App() {
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
   const [projects, setProjects] = useState(INITIAL_PROJECTS);
+  const [skills, setSkills] = useState(DEFAULT_SKILLS);
   const [isLoaded, setIsLoaded] = useState(false);
   const [cloudStatus, setCloudStatus] = useState('syncing'); // 'syncing' | 'synced' | 'local'
 
-  // UI Navigation & View State
+  // URL-based Route: '/' (home/public) vs '/admin'
+  const [currentRoute, setCurrentRoute] = useState(() => 
+    window.location.pathname.startsWith('/admin') ? 'admin' : 'home'
+  );
+
+  // UI Navigation on public view
   const [activeTab, setActiveTab] = useState('gallery'); // 'gallery' | 'pdf-studio'
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [layoutMode, setLayoutMode] = useState('grid'); // 'grid' | 'editorial' | 'list'
+  const [layoutMode, setLayoutMode] = useState('editorial'); // 'editorial' | 'grid' | 'list'
 
   // Modals
   const [detailProject, setDetailProject] = useState(null);
-  const [editingProject, setEditingProject] = useState(null); // null when closed, {} when new, project object when editing
+  const [editingProject, setEditingProject] = useState(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  // Sync browser back/forward buttons with currentRoute
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentRoute(window.location.pathname.startsWith('/admin') ? 'admin' : 'home');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Programmatic navigation between '/' and '/admin'
+  const navigateTo = (route) => {
+    setCurrentRoute(route);
+    const targetUrl = route === 'admin' ? '/admin' : '/';
+    if (window.location.pathname !== targetUrl) {
+      window.history.pushState({}, '', targetUrl);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Load persistent data: IndexedDB first for instant UI, then sync with Firebase Cloud
   useEffect(() => {
     async function loadData() {
       try {
-        const [loadedProfile, loadedProjects] = await Promise.all([
+        const [loadedProfile, loadedProjects, loadedSkills] = await Promise.all([
           getStoredProfile(),
-          getStoredProjects()
+          getStoredProjects(),
+          getStoredSkills()
         ]);
+
         if (loadedProfile) setProfile(loadedProfile);
         if (loadedProjects) setProjects(loadedProjects);
+        if (loadedSkills) setSkills(loadedSkills);
 
-        // Now attempt sync with Firebase Realtime Database
+        // Sync with Firebase Realtime Database
         try {
-          const [cloudProfile, cloudProjects] = await Promise.all([
+          const [cloudProfile, cloudProjects, cloudSkills] = await Promise.all([
             fetchProfileFromCloud(),
-            fetchProjectsFromCloud()
+            fetchProjectsFromCloud(),
+            fetchSkillsFromCloud()
           ]);
 
           if (cloudProfile && cloudProfile.name) {
             setProfile(cloudProfile);
             await saveStoredProfile(cloudProfile);
           } else if (loadedProfile) {
-            // First time initialization in cloud
             saveProfileToCloud(loadedProfile);
           }
 
@@ -72,17 +108,23 @@ export default function App() {
             setProjects(cloudProjects);
             await saveStoredProjects(cloudProjects);
           } else if (loadedProjects && loadedProjects.length > 0) {
-            // Seed cloud with initial projects
             syncProjectsToCloud(loadedProjects);
+          }
+
+          if (cloudSkills && cloudSkills.length > 0) {
+            setSkills(cloudSkills);
+            await saveStoredSkills(cloudSkills);
+          } else if (loadedSkills && loadedSkills.length > 0) {
+            syncSkillsToCloud(loadedSkills);
           }
 
           setCloudStatus('synced');
         } catch (cloudErr) {
-          console.warn('Firebase cloud sync unavailable, using local mode:', cloudErr);
+          console.warn('Firebase cloud sync fallback to local:', cloudErr);
           setCloudStatus('local');
         }
       } catch (err) {
-        console.error('Error loading stored portfolio data:', err);
+        console.error('Error loading portfolio data:', err);
         setCloudStatus('local');
       } finally {
         setIsLoaded(true);
@@ -132,14 +174,24 @@ export default function App() {
     }
   };
 
+  // Sync skills changes
+  const handleSaveSkills = async (newSkills) => {
+    setSkills(newSkills);
+    await saveStoredSkills(newSkills);
+    await syncSkillsToCloud(newSkills);
+  };
+
   // Reset to default sample works
   const handleResetDefaults = async () => {
     setProfile(DEFAULT_PROFILE);
     setProjects(INITIAL_PROJECTS);
+    setSkills(DEFAULT_SKILLS);
     await saveStoredProfile(DEFAULT_PROFILE);
     await saveStoredProjects(INITIAL_PROJECTS);
+    await saveStoredSkills(DEFAULT_SKILLS);
     await saveProfileToCloud(DEFAULT_PROFILE);
     await syncProjectsToCloud(INITIAL_PROJECTS);
+    await syncSkillsToCloud(DEFAULT_SKILLS);
   };
 
   // Restore imported data
@@ -173,6 +225,55 @@ export default function App() {
 
   const accent = profile.accentColor || '#e63946';
 
+  // ========================================================
+  // RENDER: ADMIN DASHBOARD ROUTE (/admin)
+  // ========================================================
+  if (currentRoute === 'admin') {
+    return (
+      <div className="min-h-screen bg-[#0c0c0e] text-[#ededed]">
+        <AdminDashboard
+          profile={profile}
+          projects={projects}
+          skills={skills}
+          onSaveProfile={handleSaveProfile}
+          onSaveProject={handleSaveProject}
+          onDeleteProject={handleDeleteProject}
+          onOpenNewProject={() => setEditingProject({})}
+          onOpenEditProject={(p) => setEditingProject(p)}
+          onSaveSkills={handleSaveSkills}
+          onNavigateHome={() => navigateTo('home')}
+          onOpenProfileModal={() => setIsProfileModalOpen(true)}
+          cloudStatus={cloudStatus}
+        />
+
+        {/* Project Edit Modal */}
+        {editingProject && (
+          <ProjectEditModal
+            initialProject={editingProject.id ? editingProject : null}
+            onSave={handleSaveProject}
+            onClose={() => setEditingProject(null)}
+            accentColor={accent}
+          />
+        )}
+
+        {/* Profile Settings Modal */}
+        {isProfileModalOpen && (
+          <ProfileModal
+            profile={profile}
+            projects={projects}
+            onSaveProfile={handleSaveProfile}
+            onRestoreData={handleRestoreData}
+            onResetDefaults={handleResetDefaults}
+            onClose={() => setIsProfileModalOpen(false)}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // ========================================================
+  // RENDER: PUBLIC MODERN SHOWCASE ROUTE (/)
+  // ========================================================
   return (
     <div className="min-h-screen bg-[#0c0c0e] text-[#ededed] flex flex-col selection:bg-red-600 selection:text-white">
       
@@ -181,7 +282,7 @@ export default function App() {
         profile={profile}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onOpenNewProject={() => setEditingProject({})}
+        onOpenNewProject={() => navigateTo('admin')}
         onOpenProfile={() => setIsProfileModalOpen(true)}
         onTriggerPrint={handleTriggerPrint}
         projectCount={projects.length}
@@ -196,7 +297,7 @@ export default function App() {
             <Hero
               profile={profile}
               projects={projects}
-              onOpenProfile={() => setIsProfileModalOpen(true)}
+              onOpenProfile={() => navigateTo('admin')}
             />
 
             {/* Filter & Layout Bar */}
@@ -212,12 +313,12 @@ export default function App() {
               accentColor={accent}
             />
 
-            {/* Projects Gallery */}
-            <section className="no-print py-10 sm:py-14">
+            {/* Projects Gallery - Large Full-Color Modern Editorial Showcase */}
+            <section className="no-print py-12 sm:py-20">
               <div className="max-w-7xl mx-auto px-4 sm:px-8">
                 
                 {filteredProjects.length === 0 ? (
-                  <div className="py-20 text-center border border-dashed border-white/10 rounded-xs">
+                  <div className="py-24 text-center border border-dashed border-white/10 rounded-xs">
                     <p className="text-sm font-mono text-neutral-400">
                       No works matching the selected criteria.
                     </p>
@@ -228,12 +329,24 @@ export default function App() {
                       Clear Filters
                     </button>
                   </div>
+                ) : layoutMode === 'editorial' ? (
+                  /* Editorial Stack: Big full-color showcase with text next to image */
+                  <div className="space-y-16 sm:space-y-24">
+                    {filteredProjects.map((proj, idx) => (
+                      <PublicProjectCard
+                        key={proj.id}
+                        project={proj}
+                        index={idx}
+                        accentColor={accent}
+                        onSelect={(p) => setDetailProject(p)}
+                      />
+                    ))}
+                  </div>
                 ) : (
+                  /* Grid or List View */
                   <div className={
                     layoutMode === 'list'
-                      ? 'space-y-1'
-                      : layoutMode === 'editorial'
-                      ? 'grid grid-cols-1 md:grid-cols-2 gap-8'
+                      ? 'space-y-2'
                       : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
                   }>
                     {filteredProjects.map((proj, idx) => (
@@ -244,7 +357,10 @@ export default function App() {
                         accentColor={accent}
                         layoutMode={layoutMode}
                         onSelect={(p) => setDetailProject(p)}
-                        onEdit={(p) => setEditingProject(p)}
+                        onEdit={(p) => {
+                          setEditingProject(p);
+                          navigateTo('admin');
+                        }}
                         onDelete={handleDeleteProject}
                       />
                     ))}
@@ -254,28 +370,37 @@ export default function App() {
               </div>
             </section>
 
-            {/* Bottom Monograph Footer */}
-            <footer className="no-print border-t border-white/10 py-12 bg-black/40 text-neutral-400 text-xs font-mono">
-              <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-2 text-white">
+            {/* Dynamic Skills & Progress Bars Section */}
+            <SkillsSection
+              skills={skills}
+              accentColor={accent}
+              onNavigateToAdmin={() => navigateTo('admin')}
+            />
+
+            {/* Bottom Monograph Footer with Admin Link */}
+            <footer className="no-print border-t border-white/10 py-14 bg-black/50 text-neutral-400 text-xs font-mono">
+              <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-2.5 text-white">
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: accent }} />
-                  <span>{profile.name} ARCHIVE</span>
+                  <span className="font-semibold">{profile.name} ARCHIVE</span>
                   <span className="text-neutral-600">//</span>
-                  <span className="text-neutral-400">INDEX {new Date().getFullYear()}</span>
+                  <span className="text-neutral-400">{profile.role || 'VISUAL PORTFOLIO'}</span>
                 </div>
-                <div className="flex items-center gap-4">
+
+                <div className="flex items-center gap-5">
                   <button
                     onClick={() => setActiveTab('pdf-studio')}
-                    className="hover:text-white transition-colors underline"
+                    className="hover:text-white transition-colors"
                   >
-                    Open PDF Studio
+                    Export PDF Monograph
                   </button>
                   <span>•</span>
                   <button
-                    onClick={() => setEditingProject({})}
-                    className="hover:text-white transition-colors underline"
+                    onClick={() => navigateTo('admin')}
+                    className="px-3 py-1 border border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-xs transition-colors flex items-center gap-1.5"
                   >
-                    + Add New Work
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: accent }} />
+                    <span>ADMIN STUDIO (/admin)</span>
                   </button>
                 </div>
               </div>
@@ -320,17 +445,8 @@ export default function App() {
           onEdit={(p) => {
             setDetailProject(null);
             setEditingProject(p || detailProject);
+            navigateTo('admin');
           }}
-          accentColor={accent}
-        />
-      )}
-
-      {/* Project Add / Edit Modal */}
-      {editingProject && (
-        <ProjectEditModal
-          initialProject={editingProject.id ? editingProject : null}
-          onSave={handleSaveProject}
-          onClose={() => setEditingProject(null)}
           accentColor={accent}
         />
       )}

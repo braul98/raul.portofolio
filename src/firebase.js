@@ -153,3 +153,36 @@ export async function saveProfileToCloud(profile) {
     return false;
   }
 }
+
+/**
+ * Fetch skills list from Realtime Database 'portfolio/skills'.
+ */
+export async function fetchSkillsFromCloud() {
+  try {
+    const dbRef = ref(rtdb);
+    const snapshot = await get(child(dbRef, "portfolio/skills"));
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      if (Array.isArray(data)) return data.filter(Boolean);
+      return Object.values(data);
+    }
+    return null;
+  } catch (error) {
+    console.warn("RTDB fetch skills error:", error);
+    return null;
+  }
+}
+
+/**
+ * Sync skills array to Realtime Database.
+ */
+export async function syncSkillsToCloud(skills) {
+  try {
+    const skillsRef = ref(rtdb, "portfolio/skills");
+    await set(skillsRef, skills);
+    return true;
+  } catch (error) {
+    console.warn("RTDB sync skills error:", error);
+    return false;
+  }
+}
