@@ -28,7 +28,7 @@ import {
   fetchSkillsFromCloud,
   syncSkillsToCloud
 } from './firebase';
-import { Mail, MapPin, Globe, ArrowUpRight } from 'lucide-react';
+import { Mail, MapPin, Globe, ArrowUpRight, X } from 'lucide-react';
 
 export default function App() {
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
@@ -47,8 +47,10 @@ export default function App() {
     typeof window !== 'undefined' && sessionStorage.getItem('portfolio_admin_auth') === 'true'
   );
 
-  // Modals for case study & admin editing
-  const [detailProject, setDetailProject] = useState(null);
+  // Lightbox for full-pixel image zoom
+  const [zoomedImage, setZoomedImage] = useState(null);
+
+  // Modals for admin editing
   const [editingProject, setEditingProject] = useState(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
@@ -324,7 +326,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Large Full-Color Project Showcase with Adjacent Text */}
+            {/* Large Full-Color Project Showcase with In-Page Photo Switcher & Adjacent Text */}
             <div className="space-y-16 sm:space-y-24">
               {projects.map((proj, idx) => (
                 <PublicProjectCard
@@ -332,7 +334,7 @@ export default function App() {
                   project={proj}
                   index={idx}
                   accentColor={accent}
-                  onSelect={(p) => setDetailProject(p)}
+                  onOpenZoom={(url, title) => setZoomedImage({ url, title })}
                 />
               ))}
             </div>
@@ -422,15 +424,25 @@ export default function App() {
 
       </main>
 
-      {/* Fullscreen Case Study Lightbox (Opens when clicking any work) */}
-      {detailProject && (
-        <ProjectDetailModal
-          project={detailProject}
-          allProjects={projects}
-          onClose={() => setDetailProject(null)}
-          onEdit={null}
-          accentColor={accent}
-        />
+      {/* Pure Fullscreen Image Zoom (Only opens if photo is clicked for pixel inspection) */}
+      {zoomedImage && (
+        <div
+          onClick={() => setZoomedImage(null)}
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-8 cursor-zoom-out animate-in fade-in duration-200"
+        >
+          <button
+            onClick={() => setZoomedImage(null)}
+            className="absolute top-6 right-6 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+            title="Close Zoom"
+          >
+            <X size={20} />
+          </button>
+          <img
+            src={zoomedImage.url}
+            alt={zoomedImage.title}
+            className="max-w-[95vw] max-h-[92vh] object-contain drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)]"
+          />
+        </div>
       )}
 
     </div>
