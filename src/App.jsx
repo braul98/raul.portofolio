@@ -167,9 +167,13 @@ export default function App() {
     setProjects(updated);
     await saveStoredProjects(updated);
     await syncProjectsToCloud(updated);
-    if (detailProject && detailProject.id === projectId) {
-      setDetailProject(null);
-    }
+  };
+
+  // Reorder projects in list
+  const handleReorderProjects = async (reorderedProjects) => {
+    setProjects(reorderedProjects);
+    await saveStoredProjects(reorderedProjects);
+    await syncProjectsToCloud(reorderedProjects);
   };
 
   // Sync skills changes
@@ -234,6 +238,7 @@ export default function App() {
           onSaveProfile={handleSaveProfile}
           onSaveProject={handleSaveProject}
           onDeleteProject={handleDeleteProject}
+          onReorderProjects={handleReorderProjects}
           onOpenNewProject={() => setEditingProject({})}
           onOpenEditProject={(p) => setEditingProject(p)}
           onSaveSkills={handleSaveSkills}

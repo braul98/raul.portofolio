@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { 
   ArrowLeft, 
+  ArrowUp,
+  ArrowDown,
   Plus, 
   Trash2, 
   Edit3, 
@@ -25,6 +27,7 @@ export default function AdminDashboard({
   onSaveProfile,
   onSaveProject,
   onDeleteProject,
+  onReorderProjects,
   onOpenNewProject,
   onOpenEditProject,
   onSaveSkills,
@@ -83,6 +86,15 @@ export default function AdminDashboard({
     onSaveSkills(updated);
     setSkillsSaveNotice('Skill removed and updated in cloud.');
     setTimeout(() => setSkillsSaveNotice(''), 2500);
+  };
+
+  // Move project order up/down
+  const handleMoveProject = (fromIdx, toIdx) => {
+    if (!onReorderProjects || toIdx < 0 || toIdx >= projects.length) return;
+    const reordered = [...projects];
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, moved);
+    onReorderProjects(reordered);
   };
 
   return (
@@ -266,8 +278,30 @@ export default function AdminDashboard({
                       </div>
                     </div>
 
-                    {/* Actions */}
+                    {/* Actions & Reordering */}
                     <div className="flex items-center gap-2 self-end md:self-auto">
+                      {/* Order Controls */}
+                      <div className="flex items-center gap-1 border-r border-white/10 pr-2 mr-1">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMoveProject(idx, idx - 1)}
+                          className="p-1.5 bg-white/5 hover:bg-white/15 text-neutral-300 hover:text-white rounded-xs disabled:opacity-20 disabled:pointer-events-none transition-colors"
+                          title="Move Up in Portfolio"
+                        >
+                          <ArrowUp size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === projects.length - 1}
+                          onClick={() => handleMoveProject(idx, idx + 1)}
+                          className="p-1.5 bg-white/5 hover:bg-white/15 text-neutral-300 hover:text-white rounded-xs disabled:opacity-20 disabled:pointer-events-none transition-colors"
+                          title="Move Down in Portfolio"
+                        >
+                          <ArrowDown size={13} />
+                        </button>
+                      </div>
+
                       <button
                         onClick={() => onOpenEditProject(proj)}
                         className="flex items-center gap-1.5 px-3 py-1.5 border border-white/20 bg-white/5 hover:bg-white/15 text-xs font-mono text-neutral-200 hover:text-white rounded-xs transition-colors"
