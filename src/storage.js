@@ -1,110 +1,26 @@
 import { get, set } from 'idb-keyval';
 
 export const DEFAULT_PROFILE = {
-  name: "ALEXANDER VANCE",
-  role: "VISUAL DESIGNER & ART DIRECTOR",
-  tagline: "Specializing in brand identities, high-contrast editorial photography, and spatial design.",
-  location: "BERLIN / REMOTE",
-  email: "alexander.vance@studio.design",
+  name: "Boșș Raul",
+  role: "VISUAL DESIGNER, IT Engineer, Product Manager",
+  tagline: "Transforming ideas into digital reality through web design, development, and impactful marketing content.",
+  location: "Brașov / REMOTE",
+  email: "raulstefan98@gmail.com",
   phone: "+49 30 8920 4110",
-  website: "vance.studio",
-  instagram: "@alexvance_visuals",
+  website: "",
+  instagram: "",
   status: "Available for commissions & Q3 projects",
-  accentColor: "#e63946", // Signature red
-  bio: "Working at the intersection of Swiss typography, brutalist clarity, and tactile material culture. Over 8 years curating brand systems, exhibition catalogs, and physical/digital publications for international cultural institutions and independent studios."
+  accentColor: "#f59e0b",
+  bio: "A lifelong learner driven by curiosity and continuous adaptation. My diverse professional background has equipped me with a flexible mindset and strong interpersonal skills, allowing me to thrive in dynamic environments and collaborate seamlessly with cross-functional teams. I believe that embracing new challenges is the key to delivering meaningful results."
 };
 
-export const INITIAL_PROJECTS = [
-  {
-    id: "proj-1",
-    title: "NEO-BRUTALIST PAVILION",
-    category: "Architecture",
-    year: "2026",
-    client: "Galerie Moderne",
-    role: "Lead Visualist & Documentation",
-    featured: true,
-    coverIndex: 0,
-    description: "Monolithic concrete exploration in urban acoustics. Captured using medium format monochrome photography with harsh noon shadows and pure geometric perspective.",
-    images: [
-      "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop"
-    ],
-    tools: ["Phase One IQ4", "Capture One", "Editorial Print"]
-  },
-  {
-    id: "proj-2",
-    title: "RED SHIFT : VOL. 04",
-    category: "Editorial",
-    year: "2025",
-    client: "Kyoto Art Review",
-    role: "Art Direction & Typography",
-    featured: true,
-    coverIndex: 0,
-    description: "A limited-run 180-page dual-tone monograph documenting avant-garde kinetic sculptures. Printed with Japanese soy ink in deep carbon black and fluorescent vermilion red.",
-    images: [
-      "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1200&auto=format&fit=crop"
-    ],
-    tools: ["InDesign", "Custom Glyphs", "Risograph"]
-  },
-  {
-    id: "proj-3",
-    title: "KRONOS CHRONOMETER",
-    category: "Product Design",
-    year: "2025",
-    client: "Atelier Horlogerie",
-    role: "Industrial Identity & Case Study",
-    featured: true,
-    coverIndex: 0,
-    description: "Tactile industrial timepiece crafted from bead-blasted titanium and matte sapphire. The high-contrast study balances extreme macro reflections with architectural geometry.",
-    images: [
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200&auto=format&fit=crop"
-    ],
-    tools: ["Macro 90mm", "Continuous Light", "3D CAD"]
-  },
-  {
-    id: "proj-4",
-    title: "SHADOW & CONCRETE",
-    category: "Photography",
-    year: "2024",
-    client: "Self-Initiated Archive",
-    role: "Curator & Photographer",
-    featured: false,
-    coverIndex: 0,
-    description: "An ongoing photographic survey examining light refraction through cast-concrete staircases and brutalist municipal structures across Eastern Europe.",
-    images: [
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1486718448742-163732cd1544?q=80&w=1200&auto=format&fit=crop"
-    ],
-    tools: ["Leica M11 Monochrom", "Summicron 35mm", "Silver Gelatin"]
-  },
-  {
-    id: "proj-5",
-    title: "SYNTEX IDENTITY SYSTEM",
-    category: "Branding",
-    year: "2024",
-    client: "Syntex Cybernetics",
-    role: "Brand Architect",
-    featured: false,
-    coverIndex: 0,
-    description: "Holistic typographic identity for a robotics research laboratory. Built on a rigorous 16-column grid with laser-etched black aluminum signage and signature crimson telemetry accents.",
-    images: [
-      "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1200&auto=format&fit=crop"
-    ],
-    tools: ["Brand Guidelines", "Signage Specs", "Type Design"]
-  }
-];
+export const INITIAL_PROJECTS = [];
 
 export const DEFAULT_SKILLS = [
-  { id: "sk-1", name: "Art Direction & Curation", percentage: 95, category: "Creative" },
-  { id: "sk-2", name: "Medium Format Photography", percentage: 92, category: "Visual" },
-  { id: "sk-3", name: "Editorial & Book Design", percentage: 88, category: "Design" },
-  { id: "sk-4", name: "Swiss Typography & Glyphs", percentage: 90, category: "Design" },
-  { id: "sk-5", name: "Brand Identity Systems", percentage: 85, category: "Branding" },
-  { id: "sk-6", name: "Spatial & Exhibition Design", percentage: 80, category: "Spatial" }
+  { id: "sk-1", name: "Photoshop", percentage: 74, category: "Design" },
+  { id: "sk-2", name: "Illustrator", percentage: 85, category: "Design" },
+  { id: "sk-3", name: "Lightroom", percentage: 80, category: "Design" },
+  { id: "sk-4", name: "Website creation", percentage: 90, category: "Technical" }
 ];
 
 const STORAGE_KEYS = {
@@ -113,28 +29,63 @@ const STORAGE_KEYS = {
   SKILLS: "vibe_portfolio_skills_v1"
 };
 
+// Fast synchronous localStorage cache helpers to prevent any Flash of Initial Content (FOIC)
+export function getCachedProfile() {
+  try {
+    const item = localStorage.getItem(STORAGE_KEYS.PROFILE);
+    if (item) {
+      const parsed = JSON.parse(item);
+      if (parsed && parsed.name) return parsed;
+    }
+  } catch (e) {}
+  return DEFAULT_PROFILE;
+}
+
+export function getCachedProjects() {
+  try {
+    const item = localStorage.getItem(STORAGE_KEYS.PROJECTS);
+    if (item) {
+      const parsed = JSON.parse(item);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {}
+  return [];
+}
+
+export function getCachedSkills() {
+  try {
+    const item = localStorage.getItem(STORAGE_KEYS.SKILLS);
+    if (item) {
+      const parsed = JSON.parse(item);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  return DEFAULT_SKILLS;
+}
+
 // Safe IndexedDB load / save helpers with fallback
 export async function getStoredProjects() {
   try {
     const data = await get(STORAGE_KEYS.PROJECTS);
     if (data && Array.isArray(data) && data.length > 0) {
+      try { localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(data)); } catch (e) {}
       return data;
     }
-    // Initialize defaults if empty
-    await set(STORAGE_KEYS.PROJECTS, INITIAL_PROJECTS);
-    return INITIAL_PROJECTS;
+    return getCachedProjects();
   } catch (err) {
-    console.warn("IndexedDB load error, fallback to initial:", err);
-    return INITIAL_PROJECTS;
+    console.warn("IndexedDB load error, fallback to cache:", err);
+    return getCachedProjects();
   }
 }
 
 export async function saveStoredProjects(projects) {
   try {
     await set(STORAGE_KEYS.PROJECTS, projects);
+    try { localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects)); } catch (e) {}
     return true;
   } catch (err) {
     console.error("IndexedDB save error:", err);
+    try { localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects)); } catch (e) {}
     return false;
   }
 }
@@ -143,22 +94,24 @@ export async function getStoredProfile() {
   try {
     const data = await get(STORAGE_KEYS.PROFILE);
     if (data && data.name) {
+      try { localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(data)); } catch (e) {}
       return data;
     }
-    await set(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE);
-    return DEFAULT_PROFILE;
+    return getCachedProfile();
   } catch (err) {
     console.warn("IndexedDB profile load error:", err);
-    return DEFAULT_PROFILE;
+    return getCachedProfile();
   }
 }
 
 export async function saveStoredProfile(profile) {
   try {
     await set(STORAGE_KEYS.PROFILE, profile);
+    try { localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile)); } catch (e) {}
     return true;
   } catch (err) {
     console.error("IndexedDB profile save error:", err);
+    try { localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile)); } catch (e) {}
     return false;
   }
 }
@@ -167,22 +120,24 @@ export async function getStoredSkills() {
   try {
     const data = await get(STORAGE_KEYS.SKILLS);
     if (data && Array.isArray(data) && data.length > 0) {
+      try { localStorage.setItem(STORAGE_KEYS.SKILLS, JSON.stringify(data)); } catch (e) {}
       return data;
     }
-    await set(STORAGE_KEYS.SKILLS, DEFAULT_SKILLS);
-    return DEFAULT_SKILLS;
+    return getCachedSkills();
   } catch (err) {
     console.warn("IndexedDB skills load error:", err);
-    return DEFAULT_SKILLS;
+    return getCachedSkills();
   }
 }
 
 export async function saveStoredSkills(skills) {
   try {
     await set(STORAGE_KEYS.SKILLS, skills);
+    try { localStorage.setItem(STORAGE_KEYS.SKILLS, JSON.stringify(skills)); } catch (e) {}
     return true;
   } catch (err) {
     console.error("IndexedDB skills save error:", err);
+    try { localStorage.setItem(STORAGE_KEYS.SKILLS, JSON.stringify(skills)); } catch (e) {}
     return false;
   }
 }

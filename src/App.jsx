@@ -13,6 +13,9 @@ import {
   DEFAULT_PROFILE,
   INITIAL_PROJECTS,
   DEFAULT_SKILLS,
+  getCachedProfile,
+  getCachedProjects,
+  getCachedSkills,
   getStoredProfile,
   getStoredProjects,
   getStoredSkills,
@@ -31,9 +34,9 @@ import {
 import { Mail, MapPin, Globe, ArrowUpRight, X } from 'lucide-react';
 
 export default function App() {
-  const [profile, setProfile] = useState(DEFAULT_PROFILE);
-  const [projects, setProjects] = useState(INITIAL_PROJECTS);
-  const [skills, setSkills] = useState(DEFAULT_SKILLS);
+  const [profile, setProfile] = useState(() => getCachedProfile());
+  const [projects, setProjects] = useState(() => getCachedProjects());
+  const [skills, setSkills] = useState(() => getCachedSkills());
   const [isLoaded, setIsLoaded] = useState(false);
   const [cloudStatus, setCloudStatus] = useState('syncing');
 
