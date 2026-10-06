@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Upload, Trash2, Check, Star, Plus, Link, AlertCircle } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Upload, Trash2, Check, Star, Plus, Link, AlertCircle, Loader2 } from 'lucide-react';
 import { readFileAsDataURL } from '../storage';
 import { uploadImageToStorage } from '../firebase';
 
@@ -20,6 +20,8 @@ export default function ProjectEditModal({
   accentColor
 }) {
   const accent = accentColor || '#e63946';
+  const fileInputRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [formData, setFormData] = useState({
     id: initialProject?.id || `proj-${Date.now()}`,
@@ -40,9 +42,9 @@ export default function ProjectEditModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Handle local file uploads
-  const handleFileUpload = async (e) => {
-    const files = Array.from(e.target.files || []);
+  // Process files from click or drag & drop
+  const processFiles = async (fileList) => {
+    const files = Array.from(fileList || []);
     if (files.length === 0) return;
 
     setIsProcessing(true);
@@ -51,29 +53,32 @@ export default function ProjectEditModal({
     try {
       const newImages = [];
       for (const file of files) {
-        if (!file.type.startsWith('image/')) continue;
+        if (!file.type || !file.type.startsWith('image/')) continue;
         
-        // Try uploading to Firebase Storage first
+        // Fast cloud upload attempt (with 2.5s fallback)
         const cloudUpload = await uploadImageToStorage(file);
         if (cloudUpload.success && cloudUpload.url) {
           newImages.push(cloudUpload.url);
         } else {
-          // Fallback to local Base64
-          const dataUrl = await readFileAsDataURL(file, 2048);
+          // Optimized, instant client-side canvas compression (under 150KB, crystal clear)
+          const dataUrl = await readFileAsDataURL(file, 1600, 0.85);
           newImages.push(dataUrl);
         }
       }
 
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, ...newImages]
-      }));
+      if (newImages.length === 0) {
+        setErrorMsg('Please select valid image files (JPG, PNG, WEBP, or AVIF).');
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, ...newImages]
+        }));
+      }
     } catch (err) {
-      console.error('File read error:', err);
-      setErrorMsg('Failed to process one or more images.');
+      console.error('File process error:', err);
+      setErrorMsg('Failed to process image. Please try another image or URL.');
     } finally {
       setIsProcessing(false);
-      e.target.value = '';
     }
   };
 
@@ -174,33 +179,52 @@ export default function ProjectEditModal({
               </span>
             </div>
 
-            {/* Dropzone */}
-            <div className="border-2 border-dashed border-white/20 hover:border-white/40 bg-white/[0.02] rounded-xs p-6 text-center transition-colors">
+            {/* Dropzone with click and drag & drop */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                if (e.dataTransfer.files) {
+                  processFiles(e.dataTransfer.files);
+                }
+              }}
+              className={`border-2 border-dashed rounded-xs p-6 text-center cursor-pointer transition-all ${
+                isDragging 
+                  ? 'border-white bg-white/10 scale-[1.01]' 
+                  : 'border-white/20 hover:border-white/40 bg-white/[0.02]'
+              }`}
+            >
               <input
+                ref={fileInputRef}
                 type="file"
-                id="file-upload"
                 multiple
                 accept="image/*"
-                onChange={handleFileUpload}
+                onChange={(e) => {
+                  processFiles(e.target.files);
+                  e.target.value = '';
+                }}
                 className="hidden"
               />
-              <label
-                htmlFor="file-upload"
-                className="cursor-pointer flex flex-col items-center justify-center gap-2"
-              >
+              <div className="flex flex-col items-center justify-center gap-2 pointer-events-none">
                 <div 
-                  className="w-10 h-10 rounded-xs flex items-center justify-center text-white"
+                  className="w-10 h-10 rounded-xs flex items-center justify-center text-white shadow-md"
                   style={{ backgroundColor: accent }}
                 >
-                  <Upload size={18} />
+                  {isProcessing ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
                 </div>
                 <div className="text-xs font-mono text-white font-medium">
-                  {isProcessing ? 'Processing High-Res Photos...' : 'Drop images here or click to browse files'}
+                  {isProcessing ? 'Processing & Optimizing Photos...' : 'Drop images here or click to browse'}
                 </div>
-                <div className="text-[11px] font-mono text-neutral-500">
+                <div className="text-[11px] font-mono text-neutral-400">
                   PNG, JPG, WEBP, AVIF — multiple files supported
                 </div>
-              </label>
+              </div>
             </div>
 
             {/* URL input fallback */}

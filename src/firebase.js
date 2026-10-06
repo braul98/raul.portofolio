@@ -51,13 +51,19 @@ export async function uploadImageToStorage(file) {
     const path = `portfolio-photos/${Date.now()}_${cleanFileName}`;
     const sRef = storageRef(storage, path);
     
-    const snapshot = await uploadBytes(sRef, file, {
+    // 2.5-second timeout race so local upload never hangs if Storage bucket is uninitialized
+    const uploadTask = uploadBytes(sRef, file, {
       contentType: file.type || "image/jpeg"
     });
+    const timeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Storage timeout - using fast local processing")), 2500)
+    );
+
+    const snapshot = await Promise.race([uploadTask, timeout]);
     const downloadUrl = await getDownloadURL(snapshot.ref);
     return { success: true, url: downloadUrl };
   } catch (error) {
-    console.warn("Storage upload fallback:", error.message);
+    // Graceful fallback to canvas data URL
     return { success: false, error: error.message };
   }
 }

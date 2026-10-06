@@ -187,26 +187,31 @@ export async function saveStoredSkills(skills) {
   }
 }
 
-// Helper to convert File to base64 DataURL with lightweight client-side downscale
-export function readFileAsDataURL(file, maxWidth = 1920) {
+// Helper to convert File to optimized base64 DataURL
+export function readFileAsDataURL(file, maxWidth = 1600, quality = 0.85) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        // If smaller than maxWidth, return original
-        if (img.width <= maxWidth) {
+        try {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL("image/jpeg", quality);
+          resolve(dataUrl);
+        } catch (canvasErr) {
+          console.warn("Canvas compression error, using raw file:", canvasErr);
           resolve(e.target.result);
-          return;
         }
-        // Downscale slightly to maintain crisp quality while staying lightweight
-        const canvas = document.createElement("canvas");
-        const scale = maxWidth / img.width;
-        canvas.width = maxWidth;
-        canvas.height = img.height * scale;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL(file.type || "image/jpeg", 0.92));
       };
       img.onerror = () => resolve(e.target.result);
       img.src = e.target.result;
