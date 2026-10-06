@@ -13,7 +13,9 @@ import {
   Sparkles, 
   Star,
   Image as ImageIcon,
-  Save
+  Save,
+  LogOut,
+  Printer
 } from 'lucide-react';
 
 export default function AdminDashboard({
@@ -28,6 +30,8 @@ export default function AdminDashboard({
   onSaveSkills,
   onNavigateHome,
   onOpenProfileModal,
+  onTriggerPrint,
+  onLogout,
   cloudStatus
 }) {
   const accent = profile.accentColor || '#e63946';
@@ -111,20 +115,42 @@ export default function AdminDashboard({
             </div>
           </div>
 
-          {/* Right Status */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 text-xs font-mono px-3 py-1.5 bg-white/[0.03] border border-white/10 rounded-xs">
+          {/* Right Status & Controls */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="hidden sm:flex items-center gap-1.5 text-xs font-mono px-3 py-1.5 bg-white/[0.03] border border-white/10 rounded-xs">
               <Cloud size={13} className="text-emerald-400" />
-              <span className="text-emerald-400 font-medium">REALTIME CLOUD SYNC ACTIVE</span>
+              <span className="text-emerald-400 font-medium">REALTIME SYNC</span>
             </div>
+
+            {onTriggerPrint && (
+              <button
+                onClick={onTriggerPrint}
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-white/20 bg-white/5 hover:bg-white/10 text-xs font-mono text-neutral-200 hover:text-white rounded-xs transition-colors"
+                title="Export entire portfolio to printable A4 PDF"
+              >
+                <Printer size={13} />
+                <span>EXPORT PDF</span>
+              </button>
+            )}
 
             <button
               onClick={onOpenProfileModal}
-              className="p-2 border border-white/20 bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white rounded-xs"
+              className="p-1.5 border border-white/20 bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white rounded-xs"
               title="Identity & Color Settings"
             >
               <Sliders size={14} />
             </button>
+
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="flex items-center gap-1 px-3 py-1.5 border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs font-mono rounded-xs transition-colors"
+                title="Lock admin dashboard"
+              >
+                <LogOut size={12} />
+                <span>LOCK / LOGOUT</span>
+              </button>
+            )}
           </div>
         </div>
 

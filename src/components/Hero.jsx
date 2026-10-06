@@ -100,13 +100,15 @@ export default function Hero({ profile, projects, onOpenProfile }) {
               </strong>
               {profile.bio}
             </p>
-            <button
-              onClick={onOpenProfile}
-              className="text-xs font-mono text-neutral-400 hover:text-white whitespace-nowrap flex items-center gap-1 transition-colors self-end md:self-auto"
-            >
-              <span>EDIT BIO</span>
-              <ArrowDownRight size={13} style={{ color: accent }} />
-            </button>
+            {onOpenProfile && (
+              <button
+                onClick={onOpenProfile}
+                className="text-xs font-mono text-neutral-400 hover:text-white whitespace-nowrap flex items-center gap-1 transition-colors self-end md:self-auto"
+              >
+                <span>EDIT BIO</span>
+                <ArrowDownRight size={13} style={{ color: accent }} />
+              </button>
+            )}
           </div>
         )}
 

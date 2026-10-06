@@ -7,7 +7,7 @@ export default function SkillsSection({ skills, accentColor, onNavigateToAdmin }
   if (!skills || skills.length === 0) return null;
 
   return (
-    <section className="no-print py-16 sm:py-24 border-t border-white/10 bg-[#0e0e11]">
+    <section id="skills" className="no-print py-16 sm:py-24 border-t border-white/10 bg-[#0e0e11] scroll-mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         
         {/* Section Header */}
@@ -24,15 +24,6 @@ export default function SkillsSection({ skills, accentColor, onNavigateToAdmin }
 
           <div className="flex items-center gap-4 text-xs font-mono text-neutral-400">
             <span>INDEX: {skills.length} DISCIPLINES</span>
-            {onNavigateToAdmin && (
-              <button
-                onClick={onNavigateToAdmin}
-                className="flex items-center gap-1.5 text-neutral-400 hover:text-white transition-colors underline"
-              >
-                <Sliders size={12} style={{ color: accent }} />
-                <span>EDIT IN ADMIN</span>
-              </button>
-            )}
           </div>
         </div>
 
